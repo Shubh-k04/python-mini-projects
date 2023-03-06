@@ -3,13 +3,17 @@ import os
 from pathlib import Path
 from ffpyplayer.player import MediaPlayer
 
+# Define a safe directory to restrict file access.
+SAFE_DIR = "/path/to/safe/directory"
 
 # User input for the name of the image file.
-video_name = input("Name of the video file that you want to play:    ")
+video_name = input("Name of the video file that you want to play: ")
 
 # User input for the path of the image file.
-video_directory_guess = input("Directory that may contain the video:    ")
+video_directory_guess = input("Directory that may contain the video: ")
 
+# Sanitize the user input and ensure that the directory is a subdirectory of SAFE_DIR.
+video_directory = os.path.abspath(os.path.join(SAFE_DIR, video_directory_guess))
 
 # This function finds your file. If you don't know the directory just type '/'
 def find_the_video(file_name, directory_name):
@@ -23,19 +27,13 @@ def find_the_video(file_name, directory_name):
     print(files_found)
     return files_found[0]  # Return the path.
 
-
-# Initialize the path of the image file.
-video_directory = Path(find_the_video(video_name, video_directory_guess))
-
 # Initialize the parent directory of the image path.
-new_working_directory = video_directory.parent
+new_working_directory = Path(video_directory).parent
 
 # Change the working directory of the script.
 os.chdir(new_working_directory)
 
-
-video_path = find_the_video(video_name, video_directory_guess)
-
+video_path = find_the_video(video_name, video_directory)
 
 def PlayVideo(video_path):
 
@@ -57,4 +55,4 @@ def PlayVideo(video_path):
     cv2.destroyAllWindows()
 
 
-PlayVideo(video_path)
+PlayVideo(video_path) 
