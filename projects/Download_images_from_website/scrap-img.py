@@ -3,11 +3,11 @@ import requests as rq
 import os
 from bs4 import BeautifulSoup
 import time
+import html
 
 # path= E:\web scraping\chromedriver_win32\chromedriver.exe
-path = input("Enter Path : ")
-
-url = input("Enter URL : ")
+path = input("Enter Path : ").strip()
+url = input("Enter URL : ").strip()
 
 output = "output"
 
@@ -36,13 +36,13 @@ def download_img(img_link, index):
                 extension = exe
                 break
 
-        img_data = rq.get(img_link).content
+        img_data = rq.get(img_link, timeout=10).content
         with open(output + "\\" + str(index + 1) + extension, "wb+") as f:
             f.write(img_data)
-        
+
         f.close()
-    except Exception:
-        pass
+    except rq.exceptions.RequestException as e:
+        print(f"Error downloading image {img_link}: {e}")
 
 
 result = get_url(path, url)
@@ -55,5 +55,6 @@ for index, img_link in enumerate(img_links):
     img_link = img_link["src"]
     print("Downloading...")
     if img_link:
+        img_link = html.escape(img_link)
         download_img(img_link, index)
 print("Download Complete!!")
