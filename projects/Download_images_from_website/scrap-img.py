@@ -4,6 +4,7 @@ import os
 from bs4 import BeautifulSoup
 import time
 import html
+import urllib.parse
 
 # path= E:\web scraping\chromedriver_win32\chromedriver.exe
 path = input("Enter Path : ").strip()
@@ -43,18 +44,33 @@ def download_img(img_link, index):
         f.close()
     except rq.exceptions.RequestException as e:
         print(f"Error downloading image {img_link}: {e}")
+        pass
 
 
-result = get_url(path, url)
-time.sleep(60)
-img_links = get_img_links(result)
-if not os.path.isdir(output):
-    os.mkdir(output)
+try:
+    # Sanitize input directory
+    abs_path = os.path.abspath(path)
+    if not abs_path.startswith(os.getcwd()):
+        raise ValueError("Invalid directory")
 
-for index, img_link in enumerate(img_links):
-    img_link = img_link["src"]
-    print("Downloading...")
-    if img_link:
-        img_link = html.escape(img_link)
-        download_img(img_link, index)
-print("Download Complete!!")
+    # Validate URL
+    parsed_url = urllib.parse.urlparse(url)
+    if not all([parsed_url.scheme, parsed_url.netloc]):
+        raise ValueError("Invalid URL")
+
+    result = get_url(path, url)
+    time.sleep(60)
+    img_links = get_img_links(result)
+    if not os.path.isdir(output):
+        os.mkdir(output)
+
+    for index, img_link in enumerate(img_links):
+        img_link = img_link["src"]
+        print("Downloading...")
+        if img_link:
+            img_link = html.escape(img_link)
+            download_img(img_link, index)
+    print("Download Complete!!")
+
+except Exception as e:
+    print(f"Error: {e}") 
