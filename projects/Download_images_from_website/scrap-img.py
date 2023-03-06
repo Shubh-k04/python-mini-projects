@@ -6,6 +6,7 @@ import time
 import html
 import urllib.parse
 
+# path= E:\web scraping\chromedriver_win32\chromedriver.exe
 path = input("Enter Path : ").strip()
 url = input("Enter URL : ").strip()
 
@@ -37,15 +38,17 @@ def download_img(img_link, index):
                 break
 
         img_data = rq.get(img_link, timeout=10).content
-        
-        # Sanitize output directory
-        abs_output = os.path.abspath(output)
-        if not abs_output.startswith(os.getcwd()):
-            raise ValueError("Invalid directory")
-        
-        # Save image with sanitized file path
-        img_file_path = os.path.join(abs_output, str(index + 1) + extension)
-        with open(img_file_path, "wb+") as f:
+        # Sanitize output path
+        output_path = os.path.join(os.getcwd(), output)
+        if not os.path.exists(output_path):
+            os.makedirs(output_path)
+
+        # Sanitize filename
+        filename = str(index + 1) + extension
+        filename = urllib.parse.quote_plus(filename)
+        filepath = os.path.join(output_path, filename)
+
+        with open(filepath, "wb+") as f:
             f.write(img_data)
 
     except rq.exceptions.RequestException as e:
@@ -67,8 +70,6 @@ try:
     result = get_url(path, url)
     time.sleep(60)
     img_links = get_img_links(result)
-    if not os.path.isdir(output):
-        os.mkdir(output)
 
     for index, img_link in enumerate(img_links):
         img_link = img_link["src"]
@@ -76,7 +77,8 @@ try:
         if img_link:
             img_link = html.escape(img_link)
             download_img(img_link, index)
+
     print("Download Complete!!")
 
 except Exception as e:
-    print(f"Error: {e}") 
+    print(f"Error: {e}")
