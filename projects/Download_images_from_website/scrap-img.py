@@ -6,7 +6,6 @@ import time
 import html
 import urllib.parse
 
-# path= E:\web scraping\chromedriver_win32\chromedriver.exe
 path = input("Enter Path : ").strip()
 url = input("Enter URL : ").strip()
 
@@ -38,10 +37,17 @@ def download_img(img_link, index):
                 break
 
         img_data = rq.get(img_link, timeout=10).content
-        with open(output + "\\" + str(index + 1) + extension, "wb+") as f:
+        
+        # Sanitize output directory
+        abs_output = os.path.abspath(output)
+        if not abs_output.startswith(os.getcwd()):
+            raise ValueError("Invalid directory")
+        
+        # Save image with sanitized file path
+        img_file_path = os.path.join(abs_output, str(index + 1) + extension)
+        with open(img_file_path, "wb+") as f:
             f.write(img_data)
 
-        f.close()
     except rq.exceptions.RequestException as e:
         print(f"Error downloading image {img_link}: {e}")
         pass
